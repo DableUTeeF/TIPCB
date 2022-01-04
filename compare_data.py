@@ -56,7 +56,7 @@ if __name__ == '__main__':
                 unique_id[image_data['id']] = len(unique_id) + 1  # it starts from 1 btw
             caption = caption_all[idx[0]]['captions'][idx[1]]
             encoded = seen[caption]  # called "caption_id" in `data`
-            attention_mask = (np.array(encoded) > 0).astype('int64')
+            attention_mask = (np.array(encoded) > 1).astype('int64')
             image_path = image_data['file_path']
             caption_id = unique_id[image_data['id']]  # called "labels" in the `data`
 
@@ -70,5 +70,5 @@ if __name__ == '__main__':
         out_data['images_path'] = pd.Series(out_data['images_path'])
         out_data['labels'] = pd.Series(out_data['labels'])
         # print(out_data)
-        with open(f'data/BERT_encode/thai_{stage}_128.npz', 'wb') as f_pkl:
+        with open(f'data/BERT_encode/thai_{stage}_64.npz', 'wb') as f_pkl:
             pickle.dump(out_data, f_pkl)
