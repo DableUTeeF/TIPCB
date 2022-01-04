@@ -75,6 +75,29 @@ class Network(nn.Module):
         # print('c')
         self.max_pool = nn.AdaptiveMaxPool2d((1, 1))
 
+    @torch.no_grad()
+    def forward_img(self, img):
+        _, _, img3, img4 = self.model_img(img)  # img4: batch x 2048 x 24 x 8
+        img_f4 = self.max_pool(img4).squeeze(dim=-1).squeeze(dim=-1)
+        return img_f4
+
+    @torch.no_grad()
+    def forward_text(self, txt, mask):
+        txt = self.text_embed(txt, attention_mask=mask)
+        txt = txt[0]
+        txt = txt.unsqueeze(1)
+        txt = txt.permute(0, 3, 1, 2)
+        txt3, txt41, txt42, txt43, txt44, txt45, txt46 = self.model_txt(txt)  # txt4: batch x 2048 x 1 x 64
+        txt_f3 = self.max_pool(txt3).squeeze(dim=-1).squeeze(dim=-1)
+        txt_f41 = self.max_pool(txt41)
+        txt_f42 = self.max_pool(txt42)
+        txt_f43 = self.max_pool(txt43)
+        txt_f44 = self.max_pool(txt44)
+        txt_f45 = self.max_pool(txt45)
+        txt_f46 = self.max_pool(txt46)
+        txt_f4 = self.max_pool(torch.cat([txt_f41, txt_f42, txt_f43, txt_f44, txt_f45, txt_f46], dim=2)).squeeze(dim=-1).squeeze(dim=-1)
+        return txt_f4
+
     def forward(self, img, txt, mask):
         with torch.no_grad():
             txt = self.text_embed(txt, attention_mask=mask)

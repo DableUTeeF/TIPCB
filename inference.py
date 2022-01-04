@@ -7,9 +7,27 @@ import transformers as ppb
 import torch
 
 
-if __name__ == '__main__':
+def get_model():
     args = parse_args()
     model = Network(args)
+    start, model = load_checkpoint(model, '/home/palm/PycharmProjects/TIPCB/log/Experiment04/64.pth.tar')
+    model.eval()
+    return model
+
+
+def get_transform():
+    test_transform = transforms.Compose([
+        transforms.Resize((args.height, args.width), interpolation=3),
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    ])
+    return test_transform
+
+
+args = parse_args()
+if __name__ == '__main__':
+    model = Network(args)
+    start, model = load_checkpoint(model, '/home/palm/PycharmProjects/TIPCB/log/Experiment04/64.pth.tar')
     model.eval()
     tokenizer = ppb.AutoTokenizer.from_pretrained('airesearch/wangchanberta-base-att-spm-uncased')
     # print('d')

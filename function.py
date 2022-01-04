@@ -8,7 +8,7 @@ import numpy as np
 import random
 from BERT_token_process import CUHKPEDES_BERT_token
 
-def data_config(dir, batch_size, split, max_length, embedding_type,transform):
+def data_config(dir, batch_size, split, max_length, embedding_type, transform):
     print("The word length is", max_length)
     if embedding_type == 'BERT':
         print("The word embedding type is BERT")
