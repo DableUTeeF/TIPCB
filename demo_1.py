@@ -6,11 +6,37 @@ import time
 import pickle
 import torch
 from inference import get_model, get_transform
-from PIL import Image
+from PIL import Image, ImageFont, ImageDraw
 import json
 import hnswlib
 import numpy as np
 import transformers as ppb
+
+
+fontpath = 'THSarabun.ttf'
+font = ImageFont.truetype(fontpath, 32)
+
+def add_bbox(img, bbox, labels, color, conf=None, show_txt=True, pos='top'):
+    # bbox = np.array(bbox, dtype=np.int32)
+    # cat = (int(cat) + 1) % 80
+    if conf:
+        txt = '{}:{:.1f}'.format(labels, conf)
+    else:
+        txt = labels
+    cat_size = cv2.getTextSize(txt, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)[0]
+    cv2.rectangle(img, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color, 2)
+    if show_txt:
+        if pos == 'top':
+            y1 = bbox[1] - cat_size[1] - 2
+            y2 = bbox[1]
+        else:
+            y1 = bbox[3]
+            y2 = bbox[3] + cat_size[1]
+        img_pil = Image.fromarray(img)
+        draw = ImageDraw.Draw(img_pil)
+        draw.text((y1, y2), labels, font=font, fill=color)
+        img = np.array(img_pil)
+    return img
 
 
 def detect(detector, image):
@@ -21,7 +47,7 @@ def detect(detector, image):
     for box in result:
         x1, y1, x2, y2, _ = box.astype('int')
         images.append(image[y1:y2, x1:x2])
-    return images
+    return images, result
 
 
 def gallery_image_vectors(tipcb,  # todo: make a dedicated vector generator function with batch predict, and dedicated gallery loader without try/except
@@ -64,7 +90,7 @@ def gallery_text_vector(tipcb,
 device = 'cuda'
 transform = get_transform()
 if __name__ == '__main__':
-    with open(f'data/BERT_encode/thai_test_64.npz', 'rb') as f_pkl:
+    with open(f'data/BERT_encode/thai_train_64.npz', 'rb') as f_pkl:
         data = pickle.load(f_pkl)
 
     video = cv2.VideoCapture('/home/palm/dwhelper/VIRAT Video Data-1.mp4')
@@ -86,11 +112,11 @@ if __name__ == '__main__':
 
     for i in range(400):
         ret, frame = video.read()
-        # image = cv2.imread(filename)
-
+        if i % int(fps) != 0:
+            continue
         # 1. predict
         t1 = time.time()
-        raw_images = detect(detector, frame)
+        raw_images, boxes = detect(detector, frame)
         # todo: reid
 
         # 2. pre-embed
@@ -106,4 +132,8 @@ if __name__ == '__main__':
             caption = tokenizer.decode(data['caption_id'][labels[j][0]]).replace('<pad>', '').replace('<s>', '').replace('</s>', '')
             if caption.startswith(' '):
                 caption = caption[1:]
-            cv2.imwrite(os.path.join(demo_out_dir, caption+'.png'), image)
+            frame_res = add_bbox(frame, boxes[j].astype('int'), caption, (np.random.randint(0, 255), np.random.randint(0, 255), np.random.randint(0, 160), 0))
+            cv2.imshow('a', frame_res)
+            ch = cv2.waitKey()
+            if ch == 27 or ch == ord("q") or ch == ord("Q"):
+                break
