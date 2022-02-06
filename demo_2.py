@@ -11,6 +11,7 @@ import json
 import hnswlib
 import numpy as np
 import transformers as ppb
+from torchreid.utils import FeatureExtractor
 
 
 def gallery_image_vectors(tipcb,  # todo: make a dedicated vector generator function with batch predict, and dedicated gallery loader without try/except
@@ -40,27 +41,41 @@ def detect(detector, image):
     return images, result
 
 
-def video_vector(tipcb, detector, frame, frame_id, video_name,
+def video_vector(tipcb, detector, frame, frame_id, video_name, extractor,
                  vector_folder='/media/palm/BiggerData/caption/vectors'):
-    os.makedirs(os.path.join(vector_folder, video_name), exist_ok=True)
+    # os.makedirs(os.path.join(vector_folder, video_name), exist_ok=True)
     cropped_images, boxes = detect(detector, frame)
-    vectors = []
+    tipcb_vectors = []
+    reid_vectors = []
     for i, image in enumerate(cropped_images):
         image = Image.fromarray(image)
         image = transform(image).unsqueeze(0)
-        vector = tipcb.forward_img(image.to(device))
-        os.makedirs(os.path.join(vector_folder, video_name), exist_ok=True)
-        vectors.append(vector)
+        tipcb_vector = tipcb.forward_img(image.to(device))
+        tipcb_vectors.append(tipcb_vector)
+        reid_vector = extractor(image)
+        reid_vectors.append(reid_vector)
+        # os.makedirs(os.path.join(vector_folder, video_name), exist_ok=True)
         # torch.save(vector, os.path.join(vector_folder, video_name, f'{frame_id:07d}_{i:04d}.pth'))
-    return cropped_images, vectors
+    return cropped_images, tipcb_vectors, reid_vectors
 
 
 def text2vector(text):
-    text = 'ผู้ชายใส่เสื้อกล้าม'
     token = tokenizer.encode(text, add_special_tokens=True, max_length=64, padding='max_length')
     mask = (np.array(token) > 0).astype('int64')
     vector = tipcb.forward_text(torch.tensor(token).unsqueeze(0).to(device), torch.tensor(mask).unsqueeze(0).to(device)).cpu().numpy()
     return vector
+
+
+def get_detail(text, show=True):
+    vector = text2vector(text)
+    labels, distances = tipcb_ann.knn_query(vector, k=5)
+    for i in range(len(labels[0])):
+        label = labels[0][i]
+        if show:
+            cv2.imshow(str(distances[0][i]) +'_' + str(timestamps[i]), image_indice[i])
+    if show:
+        cv2.waitKey()
+    return labels, distances
 
 
 device = 'cuda'
@@ -72,15 +87,26 @@ if __name__ == '__main__':
     fps = video.get(cv2.CAP_PROP_FPS)
     cfg = Config.fromfile('/media/palm/BiggerData/mmdetection/configs/cascade_rcnn/cascade_rcnn_r101_fpn_1x_coco.py')
     detector = init_detector(cfg, '/home/palm/PycharmProjects/mmdetection/checkpoints/cascade_rcnn_r101_fpn_20e_coco_bbox_mAP-0.425_20200504_231812-5057dcc5.pth', device='cuda')
-    tipcb = get_model().cuda()
-    ann = hnswlib.Index(space='cosine', dim=2048)
-    ann.init_index(max_elements=200, ef_construction=200, M=16)
-    ann.set_ef(50)
-    tokenizer = ppb.AutoTokenizer.from_pretrained('airesearch/wangchanberta-base-att-spm-uncased')
 
-    image_indeice = {}
+    tipcb = get_model().cuda()
+    tipcb_ann = hnswlib.Index(space='cosine', dim=2048)
+    tipcb_ann.init_index(max_elements=2000, ef_construction=200, M=16)
+    tipcb_ann.set_ef(50)
+
+    tokenizer = ppb.AutoTokenizer.from_pretrained('airesearch/wangchanberta-base-att-spm-uncased')
+    reid_extractor = FeatureExtractor(
+        model_name='osnet_x1_0',
+        model_path='/media/palm/BiggerData/deep-person-reid/cp/osnet_ms_d_c.pth.tar',
+        device='cuda'
+    )
+    reid_ann = hnswlib.Index(space='cosine', dim=512)
+    reid_ann.init_index(max_elements=2000, ef_construction=200, M=16)
+    reid_ann.set_ef(50)
+
+    reid_fetures = {}
+    image_indice = {}
     timestamps = {}
-    i = 0
+    i = -1
     count = 0
     while True:
         ret, frame = video.read()
@@ -90,19 +116,33 @@ if __name__ == '__main__':
         if i % int(fps) != 0:
             continue
 
-        cropped_images, vectors = video_vector(tipcb, detector, frame, i, 'Data-1')
-        for im, vector in zip(cropped_images, vectors):
-            ann.add_items(vector[0].cpu().numpy())
-            image_indeice[count] = im
-            timestamps[count] = i
-            count += 1
-        if i > 100:
-            break
+        cropped_images, tipcb_vectors, reid_vectors = video_vector(tipcb, detector, frame, i, 'Data-1', reid_extractor)
+        for im, tipcb_vector, reid_vector in zip(cropped_images, tipcb_vectors, reid_vectors):
+            if i==0:
+                tipcb_ann.add_items(tipcb_vector[0].cpu().numpy())
+                reid_ann.add_items(reid_vector[0].cpu().numpy())
+                image_indice[count] = im
+                timestamps[count] = [i]
+                count += 1
+            else:
+                labels, distances = reid_ann.knn_query(reid_vector[0].cpu().numpy(), k=1)
+                if distances[0] > 0.1:
+                    tipcb_ann.add_items(tipcb_vector[0].cpu().numpy())
+                    reid_ann.add_items(reid_vector[0].cpu().numpy())
+                    image_indice[count] = im
+                    timestamps[count] = [i]
+                    count += 1
+                else:
+                    timestamps[int(labels[0])].append(i)
+
+        # if i > 100:
+        #     break
 
     text = 'ผู้หญิงเสื้อน้ำเงิน'
     vector = text2vector(text)
-    labels, distances = ann.knn_query(vector, k=5)
-    for i in range(len(labels[0])):
+    labels, distances = tipcb_ann.knn_query(vector, k=50)
+    for i in range(5):
         label = labels[0][i]
-        cv2.imshow(str(distances[0][i])+'_'+str(timestamps[i]), image_indeice[i])
+        cv2.imshow(str(distances[0][i]) +'_' + str(timestamps[i]), image_indice[i])
     cv2.waitKey()
+    cv2.destroyAllWindows()

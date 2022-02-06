@@ -24,9 +24,9 @@ def find_indice(data, caption_all, tokenizer, seen={}):
             if caption['file_path'] == image_path:
                 used_path = image_path
                 for j, text in enumerate(caption['captions']):
-                    encoded = tokenizer.encode(text, add_special_tokens=True, max_length=128, padding='max_length')
-                    if len(encoded) > 128:  # this is why the npzs have "64" in their names
-                        encoded = encoded[:128]  # encoded[:63] + encoded[-1:]
+                    encoded = tokenizer.encode(text, add_special_tokens=True, max_length=64, padding='max_length')
+                    if len(encoded) > 64:  # this is why the npzs have "64" in their names
+                        encoded = encoded[:64]  # encoded[:63] + encoded[-1:]
                     seen[text] = encoded
                     indice.append((i, j))
                 break
