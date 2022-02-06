@@ -51,7 +51,7 @@ def lr_scheduler(optimizer, args):
 def load_checkpoint(model,resume):
     start_epoch=0
     if os.path.isfile(resume):
-        checkpoint = torch.load(resume)
+        checkpoint = torch.load(resume, map_location='cpu')
         # checkpoint= torch.load(resume, map_location='cuda:0')
         start_epoch = checkpoint['epoch']
         model.load_state_dict(checkpoint['state_dict'])

@@ -7,10 +7,11 @@ import transformers as ppb
 import torch
 
 
-def get_model():
+def get_model(bert='airesearch/wangchanberta-base-att-spm-uncased',
+              path='/home/palm/PycharmProjects/TIPCB/log/Experiment04/64.pth.tar'):
     args = parse_args()
-    model = Network(args)
-    start, model = load_checkpoint(model, '/home/palm/PycharmProjects/TIPCB/log/Experiment04/64.pth.tar')
+    model = Network(args, bert)
+    start, model = load_checkpoint(model, path)
     model.eval()
     return model
 

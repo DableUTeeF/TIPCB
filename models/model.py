@@ -57,7 +57,7 @@ class ResNet_image_50(nn.Module):
 
 
 class Network(nn.Module):
-    def __init__(self, args):
+    def __init__(self, args, bert='airesearch/wangchanberta-base-att-spm-uncased'):
         super(Network, self).__init__()
 
         self.model_img = ResNet_image_50()
@@ -66,7 +66,7 @@ class Network(nn.Module):
         # print('b')
 
         if args.embedding_type == 'BERT':
-            model_class, tokenizer_class, pretrained_weights = (ppb.AutoModel, ppb.AutoTokenizer, 'airesearch/wangchanberta-base-att-spm-uncased')
+            model_class, tokenizer_class, pretrained_weights = (ppb.AutoModel, ppb.AutoTokenizer, bert)
             self.text_embed = model_class.from_pretrained(pretrained_weights)
             self.text_embed.eval()
             self.BERT = True
