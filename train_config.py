@@ -14,10 +14,16 @@ def parse_args():
 
     ##save_Directory
     parser.add_argument('--checkpoint_dir', type=str,
-                        default="./log",
+                        default="/media/palm/Data/tipcb/output/ori",
                         help='directory to store checkpoint')
     parser.add_argument('--log_dir', type=str,
-                        default="./log",
+                        default="/media/palm/Data/tipcb/output/ori",
+                        help='directory to store log')
+    parser.add_argument('--image_root_path', type=str,
+                        default='/media/palm/BiggerData/caption/CUHK-PEDES/CUHK-PEDES/imgs',
+                        help='directory to store log')
+    parser.add_argument('--json_path', type=str,
+                        default='/media/palm/BiggerData/caption/CUHK-PEDES/CUHK-PEDES/caption_all.json',
                         help='directory to store log')
 
     #word_embedding
@@ -37,8 +43,10 @@ def parse_args():
     parser.add_argument('--droprate', default=0, type=float, help='drop rate')
 
     #experiment setting
-    parser.add_argument('--batch_size', type=int, default=64)
-    parser.add_argument('--num_epoches', type=int, default=80)
+    parser.add_argument('--batch_size', type=int, default=16)
+    parser.add_argument('--device', type=str, default='cuda')
+    parser.add_argument('--num_workers', type=int, default=4)
+    parser.add_argument('--num_epoches', type=int, default=30)
     parser.add_argument('--resume', action='store_true',
                         help='whether or not to restore the pretrained whole model')
 
@@ -50,7 +58,7 @@ def parse_args():
     parser.add_argument('--wd', type=float, default=0.00004)
 
     #adam_setting
-    parser.add_argument('--adam_lr', type=float, default=0.003, help='the learning rate of adam')
+    parser.add_argument('--adam_lr', type=float, default=0.0003, help='the learning rate of adam')
     parser.add_argument('--adam_alpha', type=float, default=0.9)
     parser.add_argument('--adam_beta', type=float, default=0.999)
     parser.add_argument('--epsilon', type=float, default=1e-8)
@@ -58,7 +66,7 @@ def parse_args():
     parser.add_argument('--lr_decay_type', type=str, default='MultiStepLR',
                         help='One of "MultiStepLR" or "StepLR" or "ReduceLROnPlateau"')
     parser.add_argument('--lr_decay_ratio', type=float, default=0.1)
-    parser.add_argument('--epoches_decay', type=str, default='50', help='#epoches when learning rate decays')
+    parser.add_argument('--epoches_decay', type=str, default='15', help='#epoches when learning rate decays')
     parser.add_argument('--warm_epoch', default=10, type=int, help='the first K epoch that needs warm up')
 
     # Default setting

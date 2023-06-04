@@ -65,11 +65,7 @@ class ResNet_text_50(nn.Module):
             norm_layer = nn.BatchNorm2d
         self._norm_layer = norm_layer
 
-        if args.embedding_type == 'BERT':
-            self.inplanes = 768
-        else:
-            self.inplanes=args.embedding_size
-
+        self.inplanes = 384
 
         if replace_stride_with_dilation is None:
             # each element in the tuple indicates if we should replace
