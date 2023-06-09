@@ -24,12 +24,11 @@ def train(epoch, train_loader, network, opitimizer, compute_loss, args, checkpoi
     network.train()
     progbar = tf.keras.utils.Progbar(len(train_loader))
 
-    for step, (images, text, labels) in enumerate(train_loader):
-        images = images.to(args.device)
-        labels = labels.to(args.device)
-        tokens = tokenizer(text, truncation=True, padding='max_length', return_tensors='pt').to(args.device)
-        captions = tokens['input_ids']
-        mask = tokens['attention_mask']
+    for step, (images, captions, labels, mask) in enumerate(train_loader):
+        images = images.cuda()
+        captions = captions.cuda()
+        labels = labels.cuda()
+        mask = mask.cuda()
         opitimizer.zero_grad()
 
         # compute loss

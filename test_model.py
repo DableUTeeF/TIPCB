@@ -21,11 +21,10 @@ def test(data_loader, network, args, tokenizer, writer, epoch):
     labels_bank = torch.zeros(max_size).cuda()
     index = 0
     with torch.no_grad():
-        for images, text, labels in data_loader:
+        for images, captions, labels, mask in data_loader:
             images = images.cuda()
-            tokens = tokenizer(text, truncation=True, padding='max_length', return_tensors='pt').to(args.device)
-            captions = tokens['input_ids']
-            mask = tokens['attention_mask']
+            captions = captions.cuda()
+            mask = mask.cuda()
 
             interval = images.shape[0]
             image_embeddings, text_embeddings = network(images, captions, mask)
