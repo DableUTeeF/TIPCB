@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from timm.models.vision_transformer import Block
 
 
 
@@ -74,48 +75,61 @@ class ResNet_text_50(nn.Module):
         if len(replace_stride_with_dilation) != 3:
             raise ValueError("replace_stride_with_dilation should be None "
                              "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
+        self.x3 = 512
+        self.x4 = 768
 
-
-        self.conv1 = conv1x1(self.inplanes, 1024)
-        self.bn1 = norm_layer(1024)
-        self.relu = nn.ReLU(inplace=True)
+        self.conv1 = nn.Linear(self.inplanes, self.x3, 1)
+        self.bn1 = nn.LayerNorm(self.x3)
+        self.relu = nn.GELU()
 
         downsample = nn.Sequential(
-            conv1x1(1024, 2048),
-            norm_layer(2048),
+            conv1x1(self.x3, 768),
+            norm_layer(768),
         )
 
         # 3, 4, 6, 3
 
         self.branch1 = nn.Sequential(
-            Bottleneck(inplanes=1024, planes=2048, width=512, downsample=downsample),
-            Bottleneck(inplanes=2048, planes=2048, width=512),
-            Bottleneck(inplanes=2048, planes=2048, width=512)
+            nn.Linear(self.x3, self.x4, 1),
+            nn.LayerNorm(self.x4),
+            nn.GELU(),
+            Block(self.x4, 8),
+            Block(self.x4, 8),
         )
         self.branch2 = nn.Sequential(
-            Bottleneck(inplanes=1024, planes=2048, width=512, downsample=downsample),
-            Bottleneck(inplanes=2048, planes=2048, width=512),
-            Bottleneck(inplanes=2048, planes=2048, width=512)
+            nn.Linear(self.x3, self.x4, 1),
+            nn.LayerNorm(self.x4),
+            nn.GELU(),
+            Block(self.x4, 8),
+            Block(self.x4, 8),
         )
         self.branch3 = nn.Sequential(
-            Bottleneck(inplanes=1024, planes=2048, width=512, downsample=downsample),
-            Bottleneck(inplanes=2048, planes=2048, width=512),
-            Bottleneck(inplanes=2048, planes=2048, width=512)
+            nn.Linear(self.x3, self.x4, 1),
+            nn.LayerNorm(self.x4),
+            nn.GELU(),
+            Block(self.x4, 8),
+            Block(self.x4, 8),
         )
         self.branch4 = nn.Sequential(
-            Bottleneck(inplanes=1024, planes=2048, width=512, downsample=downsample),
-            Bottleneck(inplanes=2048, planes=2048, width=512),
-            Bottleneck(inplanes=2048, planes=2048, width=512)
+            nn.Linear(self.x3, self.x4, 1),
+            nn.LayerNorm(self.x4),
+            nn.GELU(),
+            Block(self.x4, 8),
+            Block(self.x4, 8),
         )
         self.branch5 = nn.Sequential(
-            Bottleneck(inplanes=1024, planes=2048, width=512, downsample=downsample),
-            Bottleneck(inplanes=2048, planes=2048, width=512),
-            Bottleneck(inplanes=2048, planes=2048, width=512)
+            nn.Linear(self.x3, self.x4, 1),
+            nn.LayerNorm(self.x4),
+            nn.GELU(),
+            Block(self.x4, 8),
+            Block(self.x4, 8),
         )
         self.branch6 = nn.Sequential(
-            Bottleneck(inplanes=1024, planes=2048, width=512, downsample=downsample),
-            Bottleneck(inplanes=2048, planes=2048, width=512),
-            Bottleneck(inplanes=2048, planes=2048, width=512)
+            nn.Linear(self.x3, self.x4, 1),
+            nn.LayerNorm(self.x4),
+            nn.GELU(),
+            Block(self.x4, 8),
+            Block(self.x4, 8),
         )
 
 
@@ -133,7 +147,7 @@ class ResNet_text_50(nn.Module):
 
 
     def forward(self, x):
-        x1 = self.conv1(x)  # 1024 1 64
+        x1 = self.conv1(x.squeeze(2).permute(0, 2, 1))  # 1024 1 64
         x1 = self.bn1(x1)
         x1 = self.relu(x1)
         x21 = self.branch1(x1)
