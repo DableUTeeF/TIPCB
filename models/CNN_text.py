@@ -75,8 +75,8 @@ class ResNet_text_50(nn.Module):
         if len(replace_stride_with_dilation) != 3:
             raise ValueError("replace_stride_with_dilation should be None "
                              "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
-        self.x3 = 512
-        self.x4 = 768
+        self.x3 = 1024
+        self.x4 = 2048
 
         self.conv1 = nn.Linear(self.inplanes, self.x3, 1)
         self.bn1 = nn.LayerNorm(self.x3)

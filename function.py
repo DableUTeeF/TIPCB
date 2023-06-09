@@ -1,32 +1,25 @@
 import errno
 import sys
 import os.path as osp
+import torch.utils.data as data
 import os
 import torch
 import numpy as np
 import random
-from BERT_token_process import JSONDataset, split
-from torch.utils.data import DataLoader
+from BERT_token_process import CUHKPEDES_BERT_token
 
-def data_config(args):
-    train_list, val_list = split(args)
-    train_dataset = JSONDataset(args, train_list, train=True)
-    val_dataset = JSONDataset(args, val_list, train=False)
-
-    train_loader = DataLoader(train_dataset,
-                              batch_size=args.batch_size,
-                              shuffle=True,
-                              num_workers=args.num_workers,
-                              collate_fn=JSONDataset.collate_fn
-                              )
-    val_loader = DataLoader(val_dataset,
-                            batch_size=args.batch_size,
-                            shuffle=True,
-                            num_workers=args.num_workers,
-                            collate_fn=JSONDataset.collate_fn
-                            )
-    return {'train': train_loader, 'test': val_loader}
-
+def data_config(dir, batch_size, split, max_length, embedding_type,transform):
+    print("The word length is", max_length)
+    if embedding_type == 'BERT':
+        print("The word embedding type is BERT")
+        data_split = CUHKPEDES_BERT_token(dir, split, max_length, transform)
+    print("the number of", split, ":", len(data_split))
+    if split == 'train':
+        shuffle = True
+    else:
+        shuffle = False
+    loader = data.DataLoader(data_split, batch_size, shuffle=shuffle, num_workers=8)
+    return loader
 
 def optimizer_function(args, model):
     if args.optimizer == 'adam':
@@ -57,7 +50,7 @@ def lr_scheduler(optimizer, args):
 def load_checkpoint(model,resume):
     start_epoch=0
     if os.path.isfile(resume):
-        checkpoint = torch.load(resume, map_location='cpu')
+        checkpoint = torch.load(resume)
         # checkpoint= torch.load(resume, map_location='cuda:0')
         start_epoch = checkpoint['epoch']
         model.load_state_dict(checkpoint['state_dict'])
