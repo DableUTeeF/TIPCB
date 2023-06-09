@@ -28,34 +28,24 @@ def weights_init_classifier(m):
 class ResNet_image_50(nn.Module):
     def __init__(self):
         super(ResNet_image_50, self).__init__()
-        efficientnet = models.efficientnet_b4(True)
-        efficientnet.features[6][0].block[1][0].stride = (1, 1)
+        resnet50 = models.resnet50(pretrained=True)
+        resnet50.layer4[0].downsample[0].stride = (1, 1)
+        resnet50.layer4[0].conv2.stride = (1, 1)
         self.base1 = nn.Sequential(
-            efficientnet.features[0],
-            efficientnet.features[1],
-            efficientnet.features[2],
+            resnet50.conv1,
+            resnet50.bn1,
+            resnet50.relu,
+            resnet50.maxpool,
+            resnet50.layer1,  # 256 64 32
         )
         self.base2 = nn.Sequential(
-            efficientnet.features[3],
+            resnet50.layer2,  # 512 32 16
         )
         self.base3 = nn.Sequential(
-            efficientnet.features[4],
-            efficientnet.features[5],
+            resnet50.layer3,  # 1024 16 8
         )
         self.base4 = nn.Sequential(
-            efficientnet.features[6],
-            efficientnet.features[7],
-            efficientnet.features[8],
-        )
-        self.pad3 = nn.Sequential(
-            nn.Conv2d(160, 1024, 1),
-            nn.BatchNorm2d(1024),
-            nn.ReLU()
-        )
-        self.pad4 = nn.Sequential(
-            nn.Conv2d(1792, 2048, 1),
-            nn.BatchNorm2d(2048),
-            nn.ReLU()
+            resnet50.layer4  # 2048 16 8
         )
 
     def forward(self, x):
@@ -63,8 +53,6 @@ class ResNet_image_50(nn.Module):
         x2 = self.base2(x1)
         x3 = self.base3(x2)
         x4 = self.base4(x3)
-        x3 = self.pad3(x3)
-        x4 = self.pad4(x4)
         return x1, x2, x3, x4
 
 

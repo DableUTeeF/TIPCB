@@ -7,7 +7,7 @@ def parse_args():
     #dataset_Directory
     #CUHK-PEDES
     parser.add_argument('--dir', type=str,
-                        default=r'./data',
+                        default=r'/content',
                         help='directory to store dataset')
     parser.add_argument('--dataset', type=str,
                         default="CUHKPEDES")
@@ -20,7 +20,7 @@ def parse_args():
                         default="/media/palm/Data/tipcb/output/ori",
                         help='directory to store log')
     parser.add_argument('--image_root_path', type=str,
-                        default='/media/palm/BiggerData/caption/CUHK-PEDES/CUHK-PEDES/imgs',
+                        default='/content/CUHK-PEDES/imgs',
                         help='directory to store log')
     parser.add_argument('--json_path', type=str,
                         default='/media/palm/BiggerData/caption/CUHK-PEDES/CUHK-PEDES/caption_all.json',
