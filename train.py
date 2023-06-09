@@ -129,7 +129,7 @@ if __name__=='__main__':
     # define dictionary: data_transforms
     data_transforms = {
         'train': transforms.Compose(transform_train_list),
-        'val': transforms.Compose(transform_val_list),
+        'test': transforms.Compose(transform_val_list),
     }
 
     dataloaders = {x: data_config(args.dir, args.batch_size, x, args.max_length, args.embedding_type, transform=data_transforms[x])
