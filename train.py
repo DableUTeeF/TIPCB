@@ -132,7 +132,8 @@ if __name__=='__main__':
         'val': transforms.Compose(transform_val_list),
     }
 
-    dataloaders = data_config(args)
+    dataloaders = {x: data_config(args.dir, args.batch_size, x, args.max_length, args.embedding_type, transform=data_transforms[x])
+                   for x in ['train', 'test']}
     writer = SummaryWriter(log_dir=os.path.join(args.log_dir, 'log'))
 
     # loss function
