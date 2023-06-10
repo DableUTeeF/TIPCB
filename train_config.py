@@ -43,7 +43,7 @@ def parse_args():
     parser.add_argument('--droprate', default=0, type=float, help='drop rate')
 
     #experiment setting
-    parser.add_argument('--batch_size', type=int, default=16)
+    parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--device', type=str, default='cuda')
     parser.add_argument('--num_workers', type=int, default=4)
     parser.add_argument('--num_epoches', type=int, default=30)
@@ -58,7 +58,7 @@ def parse_args():
     parser.add_argument('--wd', type=float, default=0.00004)
 
     #adam_setting
-    parser.add_argument('--adam_lr', type=float, default=0.0003, help='the learning rate of adam')
+    parser.add_argument('--adam_lr', type=float, default=1e-4, help='the learning rate of adam')
     parser.add_argument('--adam_alpha', type=float, default=0.9)
     parser.add_argument('--adam_beta', type=float, default=0.999)
     parser.add_argument('--epsilon', type=float, default=1e-8)
@@ -66,8 +66,8 @@ def parse_args():
     parser.add_argument('--lr_decay_type', type=str, default='MultiStepLR',
                         help='One of "MultiStepLR" or "StepLR" or "ReduceLROnPlateau"')
     parser.add_argument('--lr_decay_ratio', type=float, default=0.1)
-    parser.add_argument('--epoches_decay', type=str, default='15', help='#epoches when learning rate decays')
-    parser.add_argument('--warm_epoch', default=10, type=int, help='the first K epoch that needs warm up')
+    parser.add_argument('--epoches_decay', type=str, default='10', help='#epoches when learning rate decays')
+    parser.add_argument('--warm_epoch', default=4, type=int, help='the first K epoch that needs warm up')
 
     # Default setting
     parser.add_argument('--seed', type=int, default=0)

@@ -75,7 +75,7 @@ def main(network, dataloader, compute_loss, optimizer, scheduler, start_epoch, a
 
         Epoch_time = time.time() - start
         start = time.time()
-        print('Epoch_training complete in {:.0f}m {:.0f}s'.format(
+        print('Epoch_{} training complete in {:.0f}m {:.0f}s'.format(epoch,
             Epoch_time // 60, Epoch_time % 60))
 
 

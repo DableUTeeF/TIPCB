@@ -157,4 +157,4 @@ class ResNet_text_50(nn.Module):
         x25 = self.branch5(x1)
         x26 = self.branch6(x1)
 
-        return x1, x21, x22, x23, x24, x25, x26
+        return x1.permute(0, 2, 1), x21.permute(0, 2, 1), x22.permute(0, 2, 1), x23.permute(0, 2, 1), x24.permute(0, 2, 1), x25.permute(0, 2, 1), x26.permute(0, 2, 1)
