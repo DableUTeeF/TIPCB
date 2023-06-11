@@ -14,10 +14,10 @@ def parse_args():
 
     ##save_Directory
     parser.add_argument('--checkpoint_dir', type=str,
-                        default="/media/palm/Data/tipcb/output/ori",
+                        default="/content/cp",
                         help='directory to store checkpoint')
     parser.add_argument('--log_dir', type=str,
-                        default="/media/palm/Data/tipcb/output/ori",
+                        default="/content/tb_log/",
                         help='directory to store log')
     parser.add_argument('--image_root_path', type=str,
                         default='/content/CUHK-PEDES/imgs',

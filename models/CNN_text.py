@@ -86,43 +86,43 @@ class ResNet_text_50(nn.Module):
             nn.Linear(self.x3, self.x4, 1),
             nn.LayerNorm(self.x4),
             nn.GELU(),
-            Block(self.x4, 4),
-            # Block(self.x4, 8),
+            Block(self.x4, 8),
+            Block(self.x4, 8),
         )
         self.branch2 = nn.Sequential(
             nn.Linear(self.x3, self.x4, 1),
             nn.LayerNorm(self.x4),
             nn.GELU(),
-            Block(self.x4, 4),
-            # Block(self.x4, 8),
+            Block(self.x4, 8),
+            Block(self.x4, 8),
         )
         self.branch3 = nn.Sequential(
             nn.Linear(self.x3, self.x4, 1),
             nn.LayerNorm(self.x4),
             nn.GELU(),
-            Block(self.x4, 4),
-            # Block(self.x4, 8),
+            Block(self.x4, 8),
+            Block(self.x4, 8),
         )
         self.branch4 = nn.Sequential(
             nn.Linear(self.x3, self.x4, 1),
             nn.LayerNorm(self.x4),
             nn.GELU(),
-            Block(self.x4, 4),
-            # Block(self.x4, 8),
+            Block(self.x4, 8),
+            Block(self.x4, 8),
         )
         self.branch5 = nn.Sequential(
             nn.Linear(self.x3, self.x4, 1),
             nn.LayerNorm(self.x4),
             nn.GELU(),
-            Block(self.x4, 4),
-            # Block(self.x4, 8),
+            Block(self.x4, 8),
+            Block(self.x4, 8),
         )
         self.branch6 = nn.Sequential(
             nn.Linear(self.x3, self.x4, 1),
             nn.LayerNorm(self.x4),
             nn.GELU(),
-            Block(self.x4, 4),
-            # Block(self.x4, 8),
+            Block(self.x4, 8),
+            Block(self.x4, 8),
         )
 
 
