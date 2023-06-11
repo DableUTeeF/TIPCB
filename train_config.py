@@ -46,7 +46,7 @@ def parse_args():
     parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--device', type=str, default='cuda')
     parser.add_argument('--num_workers', type=int, default=4)
-    parser.add_argument('--num_epoches', type=int, default=30)
+    parser.add_argument('--num_epoches', type=int, default=80)
     parser.add_argument('--resume', action='store_true',
                         help='whether or not to restore the pretrained whole model')
 
@@ -66,7 +66,7 @@ def parse_args():
     parser.add_argument('--lr_decay_type', type=str, default='MultiStepLR',
                         help='One of "MultiStepLR" or "StepLR" or "ReduceLROnPlateau"')
     parser.add_argument('--lr_decay_ratio', type=float, default=0.1)
-    parser.add_argument('--epoches_decay', type=str, default='10', help='#epoches when learning rate decays')
+    parser.add_argument('--epoches_decay', type=str, default='50', help='#epoches when learning rate decays')
     parser.add_argument('--warm_epoch', default=4, type=int, help='the first K epoch that needs warm up')
 
     # Default setting
